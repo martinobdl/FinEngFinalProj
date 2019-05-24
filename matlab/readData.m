@@ -4,7 +4,7 @@ function data = readData()
 % year, specultaive grade default rate, total defalut rate
 % and recovery rate.
 %
-% @inputs: None
+% @inputs: None.
 %
 % @outputs: data: struct with year, DG_SG, DG_All, RR
 %
