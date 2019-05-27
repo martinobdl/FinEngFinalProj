@@ -1,5 +1,5 @@
 function data = readData(fileName)
-% data = readData()
+% data = readData(fileName)
 % Read the data file into a struct with
 % year, specultaive grade default rate, total defalut rate
 % and recovery rate.

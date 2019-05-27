@@ -1,17 +1,20 @@
 function [CapitalRequrement] = CapitalRequirementNominalLHP(recoveryRate,defaultRate,correlation,confidenceLevel)
-% data = readData()
-% Read the data file into a struct with
-% year, specultaive grade default rate, total defalut rate
-% and recovery rate.
+% CapitalRequrement = CapitalRequirementNominalLHP(recoveryRate,defaultRate,correlation,confidenceLevel)
+% Computes the Capital Requirement in the case of a Large Homogeneous
+% Portfolio given the common recovery, dafalt probability and correlation
+% at the required confidence level.
 %
-% @inputs: None.
+% @inputs: recoveryRate,defaultRate,correlation,confidenceLevel
 %
-% @outputs: data: struct with year, DG_SG, DG_All, RR
+% @outputs: CapitalRequrement
 %
 
-CapitalRequrement = ...
-    (1-recoveryRate)*normcdf((norminv(defaultRate)-sqrt(correlation)*norminv(1-confidenceLevel))/sqrt(1-correlation))+...
-    -(1-recoveryRate)*defaultRate;
+VaR = normcdf((norminv(defaultRate)-sqrt(correlation)*norminv(1-confidenceLevel))/...
+    sqrt(1-correlation));
+lossGivenDefault = (1-recoveryRate);
+expectedLoss = lossGivenDefault * defaultRate;
+
+CapitalRequrement = lossGivenDefault*VaR - expectedLoss;
 
 end
 

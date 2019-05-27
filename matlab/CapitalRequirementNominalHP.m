@@ -1,12 +1,12 @@
-function [CapitalRequrement] = CapitalRequirementNominalHP(recoveryRate,defaultRate,correlation,nSim,nObligors,confidenceLevel)
-% data = readData()
-% Read the data file into a struct with
-% year, specultaive grade default rate, total defalut rate
-% and recovery rate.
+function CapitalRequrement = CapitalRequirementNominalHP(recoveryRate,defaultRate,correlation,nSim,nObligors,confidenceLevel)
+% CapitalRequrement = CapitalRequirementNominalHP(recoveryRate,defaultRate,correlation,nSim,nObligors,confidenceLevel)
+% Computes the Capital Requirement in the case of a Homogeneous
+% Portfolio of nObligors given the common recovery, dafalt probability and correlation
+% at the required confidence level, with a MC tecnique for nSim simualtions
 %
-% @inputs: None.
+% @inputs: recoveryRate,defaultRate,correlation,nSim,nObligors,confidenceLevel
 %
-% @outputs: data: struct with year, DG_SG, DG_All, RR
+% @outputs: CapitalRequrement
 %
 
 rng(1)
@@ -17,19 +17,20 @@ lossGivenDefault    = 1-recoveryRate;
 systematicRisk      = randn(nSim,1);
 idiosyncraticRisk   = randn(nSim,nObligors);
 
+% AV
 systematicRisk      = [systematicRisk;-systematicRisk];
 idiosyncraticRisk   = [idiosyncraticRisk; -idiosyncraticRisk];
 
-firmValues = sqrt(correlation)*systematicRisk + sqrt(1-correlation)*idiosyncraticRisk;
+firmValue = sqrt(correlation)*systematicRisk + sqrt(1-correlation)*idiosyncraticRisk;
 defaultBarrier      = norminv(defaultRate);
 
-numberOfDefaults    = sum(firmValues < defaultBarrier,2);
+numberOfDefaults    = sum(firmValue < defaultBarrier,2);
 
 loss = exposureAtDefault * lossGivenDefault * numberOfDefaults;
 
 VaR                 = prctile(loss,confidenceLevel*100);
 
-expectedLoss        = mean(loss);
+expectedLoss        = (1-recoveryRate)*defaultRate;
 
 CapitalRequrement   = VaR - expectedLoss;
 
