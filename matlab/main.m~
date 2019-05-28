@@ -97,21 +97,8 @@ sigma = 0.0386;
 h = posteriorDistributionRho(rho_hat,rho_vect,aa,bb);
 
 sim_rho = samplingFromPosterior(nSim,rho_vect,h);
-b = @(r) (1-r).*(r.*(1-r)-sigma.^2)./(sigma.^2);
-a = @(r) r./(1-r).*(1-r).*(r.*(1-r)-sigma.^2)./(sigma.^2);
-ss = MYmcmc(0.1,@(x)0,@(r)log(betapdf(rho_hat,a(r),b(r))),.2,nSim/100);
 
-figure()
-cdfplot(ss)
-hold on
-plot(rho_vect,cumtrapz(rho_vect,h),'-')
-
-figure()
-histogram(ss,'Normalization','pdf')
-hold on
-plot(rho_vect,h,'-')
-
-
+mcmc(0.1,@(x)0,@(rho),[.2,.5],nSim)
 
 figure()
 cdfplot(sim_rho)

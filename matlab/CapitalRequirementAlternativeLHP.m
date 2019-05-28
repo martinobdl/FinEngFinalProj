@@ -22,7 +22,7 @@ loss = (1-recoveryRate).*normcdf((defaultBarrier - sqrt(correlation).*commonRisk
 
 VaR = prctile(loss,confidenceLevel*100);
 meanLoss = mean(loss);
-CapitalRequirement = VaR- meanLoss;
+CapitalRequirement = VaR - meanLoss;
 
 end
 

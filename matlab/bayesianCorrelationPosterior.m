@@ -9,22 +9,13 @@ function [aa,bb] = bayesianCorrelationPosterior(sigma, rho_vect)
 % @outputs: data: struct with year, DG_SG, DG_All, RR
 %
 
-sigma_beta = @(a,rho) sqrt((1-rho)*rho^2/(a+rho));
-b_a = @(a,rho) a*(1-rho)/rho;
-
-aa = zeros(size(rho_vect));
-bb = zeros(size(rho_vect));
-
-fun = @(a,rho) sigma_beta(a,rho)-sigma;
-
-for i=1:length(aa)
-    r = rho_vect(i);
-    eps = 1e-6;
-    a = fzero(@(a) fun(a,r),[eps,10000]);
-    b = b_a(a,r);
-    aa(i) = a;
-    bb(i) = b;
+if min(rho_vect-1/2*(1-sqrt(1-4*sigma.^2)))<0 || max(rho_vect-1/2*(1+sqrt(1-4*sigma.^2)))>0
+    error("rho_vect is too small or too big")
 end
+
+bb = (1-rho_vect).*(rho_vect.*(1-rho_vect)-sigma.^2)./(sigma.^2);
+aa = rho_vect./(1-rho_vect).*bb;
+
 
 end
 

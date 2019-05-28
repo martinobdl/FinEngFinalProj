@@ -9,12 +9,12 @@ function [CapitalRequrement] = CapitalRequirementNominalLHP(recoveryRate,default
 % @outputs: CapitalRequrement
 %
 
-VaR = normcdf((norminv(defaultRate)-sqrt(correlation)*norminv(1-confidenceLevel))/...
-    sqrt(1-correlation));
 lossGivenDefault = (1-recoveryRate);
+VaR = lossGivenDefault*(normcdf((norminv(defaultRate)-sqrt(correlation)*norminv(1-confidenceLevel))/...
+    sqrt(1-correlation)));
 expectedLoss = lossGivenDefault * defaultRate;
 
-CapitalRequrement = lossGivenDefault*VaR - expectedLoss;
+CapitalRequrement = VaR - expectedLoss;
 
 end
 
