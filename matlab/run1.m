@@ -6,7 +6,7 @@ clc
 rng('default')
 %% INPUT
 
-data = readData('dati_Altman.csv');      % reading input data
+data = readData('../data/dati_Altman.csv');      % reading input data
 
 DR_mean = mean(data.DR_SG);              % default rate speculative grade
 DR_std  = std(data.DR_SG);               % mean and standard deviation
@@ -27,7 +27,7 @@ rho_std  = 0.0386;                       % mean and standard deviation
 rho_B_mean = correlationFromBasel2(DR_mean);  % Basel correlation
 
 N_ob  = 60;                              % number of obligors
-N_sim = 5e5;                             % number of simulations
+N_sim = 1e6;                             % number of simulations
 
 CL1 = 0.99;                              % confidence level 99.0 %
 CL2 = 0.999;                             % confidence level 99.9 %
@@ -81,7 +81,7 @@ disp('Recovery rate normality')
 %% B.2 - B.3 simulations required
 
 [d_mean,d_std] = normfit(d);     
-d_sim = -1.9228+ randn(N_sim,1)*d_std;      % simulated default barriers
+d_sim = d_mean + randn(N_sim,1)*d_std;      % simulated default barriers
 DR_sim = normcdf(d_sim);                    % simulated default rates
 
 RR_sim = RR_mean + randn(N_sim,1)*RR_std;   % simulated recovery rates
@@ -245,15 +245,16 @@ disp(table(CRalt_HP_CL1_B,CRalt_HP_CL2_B,addOn_HP_CL1_B,...
     'VariableNames',{'CR_99','CR_999','AddOn_99','AddOn_999'}))
 
 %% C.1
+n = length(data.years);
   % i. d distribution
-mu_post = d_hat/(1+DR_std^2);
-   mu_post=-1.9107;% i risultati tornano se si fa sta cosa orrenda
+mu_post = d_hat/(1+d_std^2/n);
+   %mu_post=-1.9107;% i risultati tornano se si fa sta cosa orrenda
 sigma_post = d_std/sqrt(1+d_std^2);
 d_sim = mu_post + sigma_post*randn(N_sim,1);
 
 DR_sim = normcdf(d_sim);
 CR = CapitalRequirementAlternativeLHP(RR_mean,DR_sim,rho_mean,CL1,systematicRisk)
-
+CR/CR_LHP_CL1-1
   % ii. rho distribution
 
 rho_vect = linspace(0.005,0.995,500);
@@ -262,6 +263,44 @@ rho_vect = linspace(0.005,0.995,500);
 h = posteriorDistributionRho(rho_mean,rho_vect,aa,bb);
 rho_sim = samplingFromPosterior(N_sim,rho_vect,h);
 
-CapitalRequirementAlternativeLHP(RR_mean,defaultRateSGMean,sim_rho,confidenceLevel1,nSim)/base-1
+%CapitalRequirementAlternativeLHP(RR_mean,defaultRateSGMean,sim_rho,confidenceLevel1,nSim)/base-1
 
+%%
 
+rho_vect = linspace(0.006,0.98,500);
+
+n=N_ob;
+
+CR_std = CRrho(n,rho_vect);
+
+[aa,bb] = betaParameter(rho_vect,CR_std);
+
+h = posteriorDistributionRho(rho_hat,rho_vect,aa,bb);
+
+rho_sim = samplingFromPosterior(N_sim,rho_vect,h);
+rho_hat = 0.0924;
+s = @(x) sqrt((2*(1-x).^2.*(1+(n-1).*x).^2)./(n.*(n-1)));
+b = @(r) (1-r).*(r.*(1-r)-s(r).^2)./(s(r).^2);
+a = @(r) r./(1-r).*(1-r).*(r.*(1-r)-s(r).^2)./(s(r).^2);
+
+%X   = mcmc(0.1,@(x)0,@(x) log(betapdf(rho_hat,a(x),b(x))),0.2,N_sim/100);
+
+X = samplingFromPosterior(N_sim,rho_vect,h);
+
+figure()
+histogram(X,'Normalization','pdf')
+hold on
+plot(rho_vect,h,'-')
+
+CapitalRequirementAlternativeHP(...
+             RR_mean,DR_mean,X,CL1,...
+             systematicRisk,idiosyncraticRisk)/CR_HP_CL1-1
+
+%%
+
+figure
+plot(norminv(data.DR_AR),data.RR,'*')
+xlabel('d')
+ylabel('\pi')
+
+[B,BINT,R] = regress(norminv(data.DR_AR),data.RR)

@@ -17,10 +17,10 @@ confidenceLevel2 = 0.999;
 rhoMean = 0.0924;
 recoveryMean = mean(data.RR);
 recoveryStdev = std(data.RR);
-defaultRateSGMean = mean(data.DG_SG);
-defaultBarrierSGMean = mean(norminv(data.DG_SG));
+defaultRateSGMean = mean(data.DR_SG);
+defaultBarrierSGMean = mean(norminv(data.DR_SG));
 % defaultBarrierSGMean = -1.920994087;
-defaultBarrierSGstdev = std(norminv(data.DG_SG));
+defaultBarrierSGstdev = std(norminv(data.DR_SG));
 nSim = 2e5;
 
 %% A
@@ -99,7 +99,7 @@ h = posteriorDistributionRho(rho_hat,rho_vect,aa,bb);
 sim_rho = samplingFromPosterior(nSim,rho_vect,h);
 b = @(r) (1-r).*(r.*(1-r)-sigma.^2)./(sigma.^2);
 a = @(r) r./(1-r).*(1-r).*(r.*(1-r)-sigma.^2)./(sigma.^2);
-ss = MYmcmc(0.1,@(x)0,@(r)log(betapdf(rho_hat,a(r),b(r))),.2,nSim/100);
+ss = MYmcmc(0.1,@(x)0,@(r)log(betapdf(rho_hat,a(r),b(r))),.2,nSim);
 
 figure()
 cdfplot(ss)
