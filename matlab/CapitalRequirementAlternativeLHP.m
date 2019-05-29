@@ -1,7 +1,9 @@
-function CapitalRequirement = CapitalRequirementAlternativeLHP(recoveryRate,defaultRate,correlation,confidenceLevel,nSim)
-% CapitalRequrement = CapitalRequirementNominalLHP(recoveryRate,defaultRate,correlation,confidenceLevel)
+function CapitalRequirement = CapitalRequirementAlternativeLHP(...
+recoveryRate,defaultRate,correlation,confidenceLevel,systematicRisk)
+% CapitalRequrement = CapitalRequirementNominalLHP(recoveryRate,...
+%defaultRate,correlation,confidenceLevel)
 % Computes the Capital Requirement in the case of a Large Homogeneous
-% Portfolio given the common recovery, dafalt probability and correlation
+% Portfolio given the common recovery, dafualt probability and correlation
 % at the required confidence level.
 %
 % @inputs: recoveryRate,defaultRate,correlation,confidenceLevel
@@ -11,12 +13,11 @@ function CapitalRequirement = CapitalRequirementAlternativeLHP(recoveryRate,defa
 
 %% simulation
 
-commonRiskFactor = randn(nSim,1);
 defaultBarrier = norminv(defaultRate);
 
 %% Loss
 
-loss = (1-recoveryRate).*normcdf((defaultBarrier - sqrt(correlation).*commonRiskFactor)./sqrt(1-correlation));
+loss = (1-recoveryRate).*normcdf((defaultBarrier - sqrt(correlation).*systematicRisk)./sqrt(1-correlation));
 
 %% VaR and CR
 

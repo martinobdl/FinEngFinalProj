@@ -1,20 +1,20 @@
-function [CapitalRequrement] = CapitalRequirementNominalLHP(recoveryRate,defaultRate,correlation,confidenceLevel)
-% CapitalRequrement = CapitalRequirementNominalLHP(recoveryRate,defaultRate,correlation,confidenceLevel)
-% Computes the Capital Requirement in the case of a Large Homogeneous
-% Portfolio given the common recovery, dafalt probability and correlation
-% at the required confidence level.
+function [CapitalRequirement] = CapitalRequirementNominalLHP(recoveryRate,...
+    defaultRate,correlation,confidenceLevel)
+% Computes capital requirement in the nominal model large homogeneous
+% porftolio case
 %
-% @inputs: recoveryRate,defaultRate,correlation,confidenceLevel
-%
-% @outputs: CapitalRequrement
+% @inputs:   recovery rate, 
+%            probability of default, 
+%            correlation
+%            confidence level
+% @outputs: CapitalRequirement
 %
 
 lossGivenDefault = (1-recoveryRate);
-VaR = lossGivenDefault*(normcdf((norminv(defaultRate)-sqrt(correlation)*norminv(1-confidenceLevel))/...
-    sqrt(1-correlation)));
-expectedLoss = lossGivenDefault * defaultRate;
+valueAtRisk = lossGivenDefault.*normcdf((norminv(defaultRate)-sqrt(correlation).*norminv(1-confidenceLevel))./sqrt(1-correlation));
+expectedLoss = lossGivenDefault.*defaultRate;
 
-CapitalRequrement = VaR - expectedLoss;
+CapitalRequirement = mean(valueAtRisk - expectedLoss);
 
 end
 

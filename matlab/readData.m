@@ -1,5 +1,5 @@
 function data = readData(fileName)
-% data = readData(fileName)
+% data = readData()
 % Read the data file into a struct with
 % year, specultaive grade default rate, total defalut rate
 % and recovery rate.
@@ -11,9 +11,9 @@ function data = readData(fileName)
 
     matrixData = dlmread(fileName,',',1,0);
     
-    data.years   = matrixData(:,1);
-    data.DG_SG  = matrixData(:,2);
-    data.DG_All = matrixData(:,3);
+    data.years  = matrixData(:,1);
+    data.DR_SG  = matrixData(:,2);
+    data.DR_AR  = matrixData(:,3);
     data.RR     = matrixData(:,4);
     
 end

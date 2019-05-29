@@ -62,7 +62,7 @@ linkaxes([ax1,ax2],'x')
 %% B2
 
 base = CapitalRequirementNominalLHP(recoveryMean,defaultRateSGMean,rhoMean,confidenceLevel1);
-nSim = 1e6;
+nSim = 1e4;
 a=5.1083;
 b=50.1766;
 rho_sim = betarnd(a,b,nSim,1);

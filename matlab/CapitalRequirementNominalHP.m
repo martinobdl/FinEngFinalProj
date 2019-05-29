@@ -1,37 +1,34 @@
-function CapitalRequrement = CapitalRequirementNominalHP(recoveryRate,defaultRate,correlation,nSim,nObligors,confidenceLevel)
-% CapitalRequrement = CapitalRequirementNominalHP(recoveryRate,defaultRate,correlation,nSim,nObligors,confidenceLevel)
-% Computes the Capital Requirement in the case of a Homogeneous
-% Portfolio of nObligors given the common recovery, dafalt probability and correlation
-% at the required confidence level, with a MC tecnique for nSim simualtions
+function [CapitalRequrement] = CapitalRequirementNominalHP(recoveryRate,...
+                    defaultRate,correlation,systematicRisk,idiosyncraticRisk,confidenceLevel)
+% data = readData()
+% Read the data file into a struct with
+% year, specultaive grade default rate, total defalut rate
+% and recovery rate.
 %
-% @inputs: recoveryRate,defaultRate,correlation,nSim,nObligors,confidenceLevel
+% @inputs: None.
 %
-% @outputs: CapitalRequrement
+% @outputs: data: struct with year, DG_SG, DG_All, RR
 %
 
-rng(1)
+nObligors = size(idiosyncraticRisk,2);
 
 exposureAtDefault   = 1/nObligors;
 lossGivenDefault    = 1-recoveryRate;
 
-systematicRisk      = randn(nSim,1);
-idiosyncraticRisk   = randn(nSim,nObligors);
+systematicRiskVR      = [systematicRisk;-systematicRisk];
+idiosyncraticRiskVR   = [idiosyncraticRisk; -idiosyncraticRisk];
 
-% AV
-systematicRisk      = [systematicRisk;-systematicRisk];
-idiosyncraticRisk   = [idiosyncraticRisk; -idiosyncraticRisk];
-
-firmValue = sqrt(correlation)*systematicRisk + sqrt(1-correlation)*idiosyncraticRisk;
+firmValues = sqrt(correlation)*systematicRiskVR + sqrt(1-correlation)*idiosyncraticRiskVR;
 defaultBarrier      = norminv(defaultRate);
 
-numberOfDefaults    = sum(firmValue < defaultBarrier,2);
+numberOfDefaults    = sum(firmValues < defaultBarrier,2);
 
 loss = exposureAtDefault * lossGivenDefault * numberOfDefaults;
 
-VaR                 = prctile(loss,confidenceLevel*100);
+valueAtRisk         = prctile(loss,confidenceLevel*100);
 
-expectedLoss        = (1-recoveryRate)*defaultRate;
+expectedLoss        = mean(loss);
 
-CapitalRequrement   = VaR - expectedLoss;
+CapitalRequrement   = valueAtRisk - expectedLoss;
 
 end
