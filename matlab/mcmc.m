@@ -9,7 +9,7 @@ f = waitbar(0,'');
 sim = randn(nSim-1,1);
 
 for ii=2:nSim
-    waitbar(ii/nSim,f)
+    waitbar(ii/nSim,f,sprintf('Please wait: %2.2f%%',ii*100/nSim))
     x1=x0+sim(ii-1)*stepsize;
     proposed_logprior=logprior(x1);
     proposed_logL=loglikelihood(x1);
@@ -20,3 +20,5 @@ for ii=2:nSim
     end
     X(ii)=x0;
 end
+delete(f)
+
