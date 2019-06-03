@@ -1,10 +1,9 @@
-%% 
+%%
 
 clear all
 close all
 clc
 rng('default')
-
 %% INPUT
 
 data = readData('../data/dati_Moody.csv');      % reading input data
@@ -17,8 +16,8 @@ DR_std  = std(data.DR_SG);               % mean and standard deviation
 
 d_std = std(norminv(data.DR_SG)); % ??? questo non sono ancora convinta
 
-f_0 = @(D) integral(@(x) normpdf(x).*normcdf(D+d_std*x),-30,30)-DR_mean;
-d_hat = fzero(f_0,[-5,1]);             % unbiased default barrier mean
+f_0 = @(D) normcdf(D) - D*exp(-D^2/2)*d_std^2/(2*sqrt(2*pi))-DR_mean;
+d_hat = fzero(f_0,[-10,10]);             % unbiased default barrier mean
 
 RR_mean = mean(data.RR);                 % recovery rate
 RR_std  = std(data.RR);                  % mean and standard deviation
@@ -35,7 +34,7 @@ CL2 = 0.999;                             % confidence level 99.9 %
 
 idiosyncraticRisk = randn(N_sim,N_ob);   % simulation of idiosyncratic risk
 systematicRisk    = randn(N_sim,1);      % simulation of systematic risk
-        
+
 %% A
   % i. Using mean correlation
 disp('Capital requirement nominal model')
@@ -75,14 +74,14 @@ d = norminv(data.DR_SG);           % default barrier speculative grade
 
 % Shapiro wilk normality tests
 disp('Default barrier normality')
-[H_d,pValue_d] = swtest(d)   
+[H_d,pValue_d] = swtest(d)
 disp('Recovery rate normality')
 [H_RR,pValue_RR] = swtest(data.RR)
 
 %% B.2 - B.3 simulations required
 
-[d_mean,d_std] = normfit(d);     
-d_sim = d_hat + randn(N_sim,1)*d_std;      % simulated default barriers
+[d_mean,d_std] = normfit(d);
+d_sim = d_mean + randn(N_sim,1)*d_std;      % simulated default barriers
 DR_sim = normcdf(d_sim);                    % simulated default rates
 
 RR_sim = RR_mean + randn(N_sim,1)*RR_std;   % simulated recovery rates
@@ -122,7 +121,7 @@ CR_LHP_CL2_d = CapitalRequirementAlternativeLHP(RR_mean,DR_sim,...
 CR_LHP_CL2_RR = CapitalRequirementAlternativeLHP(RR_sim,DR_mean,...
                rho_mean,CL2,systematicRisk);  % recovery rate
 CR_LHP_CL2_rho = CapitalRequirementAlternativeLHP(RR_mean,DR_mean,...
-               rho_sim,CL2,systematicRisk);   % correlation 
+               rho_sim,CL2,systematicRisk);   % correlation
 CR_LHP_CL2_d_rho = CapitalRequirementAlternativeLHP(RR_mean,DR_sim,...
                rho_sim,CL2,systematicRisk);   % default rate and corr
 CR_LHP_CL2_all = CapitalRequirementAlternativeLHP(RR_sim,DR_sim,...
@@ -149,7 +148,7 @@ CR_HP_CL1_rho = CapitalRequirementAlternativeHP(RR_mean,DR_mean,rho_sim,...
 CR_HP_CL1_d_rho = CapitalRequirementAlternativeHP(RR_mean,DR_sim,rho_sim,...
         CL1,systematicRisk,idiosyncraticRisk);  % default rate and corr
 CR_HP_CL1_all = CapitalRequirementAlternativeHP(RR_sim,DR_sim,rho_sim,...
-        CL1,systematicRisk,idiosyncraticRisk);  % all parameters 
+        CL1,systematicRisk,idiosyncraticRisk);  % all parameters
 
 % Capital Requirement alternative models, HP, confidence level 99.0 %
 CRalt_HP_CL1 = [CR_HP_CL1_d;CR_HP_CL1_RR ;CR_HP_CL1_rho;...
@@ -179,7 +178,7 @@ disp(table(CRalt_HP_CL1,CRalt_HP_CL2,addOn_HP_CL1,addOn_HP_CL2,...
             'RowNames',{'d','RR','rho','d_rho','All'},...
             'VariableNames',{'CR_99','CR_999','AddOn_99','AddOn_999'}))
 
-%% B.3 
+%% B.3
 
 disp('Capital Requirement & Add On frequentist inference, basel correlation')
 % LHP
@@ -220,7 +219,7 @@ CR_HP_CL1_B_d = CapitalRequirementAlternativeHP(RR_mean,DR_sim,...
    rho_sim_B,CL1,systematicRisk,idiosyncraticRisk);  % default rate
 CR_HP_CL1_B_RR = CapitalRequirementAlternativeHP(RR_sim,DR_mean,...
    rho_B_mean,CL1,systematicRisk,idiosyncraticRisk); % recovery rate
-CR_HP_CL1_B_d_RR = CapitalRequirementAlternativeHP(RR_sim,DR_sim,...  
+CR_HP_CL1_B_d_RR = CapitalRequirementAlternativeHP(RR_sim,DR_sim,...
    rho_sim_B,CL1,systematicRisk,idiosyncraticRisk);  % default and recovery
 
 % Capital Requirement alternative models, HP, confidence level 99.0%, Basel
@@ -271,7 +270,7 @@ rho_sim = samplingFromPosterior(N_sim,rho_vect,h);
 rho_vect = linspace(0.006,0.98,500);
 
 n=N_ob;
-rho_hat = 0.0924;
+
 CR_std = CRrho(n,rho_vect);
 
 [aa,bb] = betaParameter(rho_vect,CR_std);
@@ -279,6 +278,7 @@ CR_std = CRrho(n,rho_vect);
 h = posteriorDistributionRho(rho_hat,rho_vect,aa,bb);
 
 rho_sim = samplingFromPosterior(N_sim,rho_vect,h);
+rho_hat = 0.0924;
 s = @(x) sqrt((2*(1-x).^2.*(1+(n-1).*x).^2)./(n.*(n-1)));
 b = @(r) (1-r).*(r.*(1-r)-s(r).^2)./(s(r).^2);
 a = @(r) r./(1-r).*(1-r).*(r.*(1-r)-s(r).^2)./(s(r).^2);
@@ -326,5 +326,3 @@ CapitalRequirementAlternativeLHP(RR_mean,DR_Sim,rho_mean,CL1,randn(N_sim/100,1))
 % FIX CORRELATION (NO DATA FOR CORRELATION)
 
 [Default_S1, Recovery_S2, Correlation_S3] = SobolInidices(data.DR_SG,data.RR)
-
-%%
