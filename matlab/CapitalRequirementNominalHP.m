@@ -20,7 +20,7 @@ M=(0:nObligors)';
 P=prob_m(M);    
 
 P_cum = cumsum(P);
-idx = min(find(P_cum>=confidenceLevel))-1;
+idx = find(P_cum>=confidenceLevel, 1 )-1;
 meanloss = exposureAtDefault*P'*M*lossGivenDefault;
 CapitalRequirement = idx*exposureAtDefault*lossGivenDefault - meanloss;
 

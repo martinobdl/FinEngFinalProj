@@ -7,7 +7,7 @@ rng('default')
 
 %% INPUT
 
-data = readData('../data/dati_Altman.csv');      % reading input data
+data = readData('../data/dati_Moody.csv');      % reading input data
 
 DR_mean = mean(data.DR_SG);              % default rate speculative grade
 DR_std  = std(data.DR_SG);               % mean and standard deviation
@@ -300,8 +300,12 @@ CapitalRequirementAlternativeHP(...
 
 figure
 plot(norminv(data.DR_AR),data.RR,'*')
-xlabel('d')
-ylabel('\pi')
+hold on
+plot(norminv(data.DR_SG),data.RR,'*')
+xlabel('DefaultBarrier')
+legend('AllGrade','SpeculativeGrade')
+grid on
+ylabel('Recovery')
 
 [r,m,b] = regression(norminv(data.DR_AR)',data.RR','one');
 plotregression(norminv(data.DR_AR),data.RR)
@@ -314,7 +318,6 @@ d_sim   = mcmc(0.5,@(x) log(normpdf(x)),@(x) sum(log(normpdf(d,x,d_std))),0.2,N_
 
 DR_Sim = normcdf(d_sim);
 
-
 CapitalRequirementAlternativeLHP(RR_mean,DR_Sim,rho_mean,CL1,randn(N_sim/100,1))/CR_LHP_CL1-1
 
 %% Sobol Indices
@@ -322,5 +325,6 @@ CapitalRequirementAlternativeLHP(RR_mean,DR_Sim,rho_mean,CL1,randn(N_sim/100,1))
 % INPUT PARAMETERS ARE NOT INDEPENDENT
 % FIX CORRELATION (NO DATA FOR CORRELATION)
 
-[S1,S2,S3] = SobolInidices(data.DR_SG,data.RR)
+[Default_S1, Recovery_S2, Correlation_S3] = SobolInidices(data.DR_SG,data.RR)
 
+%%
