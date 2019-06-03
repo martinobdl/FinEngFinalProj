@@ -1,7 +1,7 @@
 function h = posteriorDistributionRho(rho_hat,rho_vect,aa,bb)
-%Computes posterior distribution when the prior is uniform and the
-%likelihood is a beta given the observed rho hat
-% @inputs: rho_hat,rho_vect,aa,bb
+% Computes posterior distribution when the prior is uniform and the
+% likelihood is a beta given the observed rho_hat
+% @inputs:  rho_hat, rho_vect, aa, bb
 %
 % @outputs: h
 %

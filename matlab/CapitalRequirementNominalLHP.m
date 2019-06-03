@@ -14,7 +14,7 @@ lossGivenDefault = (1-recoveryRate);
 valueAtRisk = lossGivenDefault.*normcdf((norminv(defaultRate)-sqrt(correlation).*norminv(1-confidenceLevel))./sqrt(1-correlation));
 expectedLoss = lossGivenDefault.*defaultRate;
 
-CapitalRequirement = mean(valueAtRisk - expectedLoss);
+CapitalRequirement = valueAtRisk - expectedLoss;
 
 end
 

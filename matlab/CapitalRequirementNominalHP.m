@@ -1,34 +1,28 @@
-function [CapitalRequrement] = CapitalRequirementNominalHP(recoveryRate,...
-                    defaultRate,correlation,systematicRisk,idiosyncraticRisk,confidenceLevel)
-% data = readData()
-% Read the data file into a struct with
-% year, specultaive grade default rate, total defalut rate
-% and recovery rate.
+function [CapitalRequirement] = CapitalRequirementNominalHP(recoveryRate,...
+                    defaultRate,correlation,confidenceLevel,nObligors)
+% Computes the capital requirement for a homogeneous portfolio at a given
+% confidence level
 %
-% @inputs: None.
+% @inputs: recoveryRate
 %
-% @outputs: data: struct with year, DG_SG, DG_All, RR
+% @outputs: CapitalRequirement
 %
-
-nObligors = size(idiosyncraticRisk,2);
-
+ 
 exposureAtDefault   = 1/nObligors;
 lossGivenDefault    = 1-recoveryRate;
+defaultBarrier = norminv(defaultRate);
+binomialcoef = @(N,n) factorial(N)./(factorial(n).*factorial(N-n));
 
-systematicRiskVR      = [systematicRisk;-systematicRisk];
-idiosyncraticRiskVR   = [idiosyncraticRisk; -idiosyncraticRisk];
+p = @(y) normcdf((defaultBarrier-sqrt(correlation).*y)./(sqrt(1-correlation)));
+cond_law = @(y,m) (p(y).^m).*(1-p(y)).^(nObligors-m);
+prob_m = @(m) integral(@(y) normpdf(y).*cond_law(y,m).*binomialcoef(nObligors,m),-30,30,'ArrayValued',true);
+M=(0:nObligors)';
+P=prob_m(M);    
 
-firmValues = sqrt(correlation)*systematicRiskVR + sqrt(1-correlation)*idiosyncraticRiskVR;
-defaultBarrier      = norminv(defaultRate);
+P_cum = cumsum(P);
+idx = min(find(P_cum>=confidenceLevel))-1;
+meanloss = exposureAtDefault*P'*M*lossGivenDefault;
+CapitalRequirement = idx*exposureAtDefault*lossGivenDefault - meanloss;
 
-numberOfDefaults    = sum(firmValues < defaultBarrier,2);
-
-loss = exposureAtDefault * lossGivenDefault * numberOfDefaults;
-
-valueAtRisk         = prctile(loss,confidenceLevel*100);
-
-expectedLoss        = mean(loss);
-
-CapitalRequrement   = valueAtRisk - expectedLoss;
 
 end

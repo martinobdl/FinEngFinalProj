@@ -20,5 +20,8 @@ for ii=2:nSim
     end
     X(ii)=x0;
 end
-delete(f)
 
+F = findall(0,'type','figure','tag','TMWWaitbar');
+delete(F)
+
+end
