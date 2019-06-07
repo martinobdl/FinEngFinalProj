@@ -1,4 +1,4 @@
-%% 
+%%
 
 clear all
 close all
@@ -6,7 +6,7 @@ clc
 rng('default')
 %% INPUT
 
-data = readData('../data/dati_Altman.csv');      % reading input data
+data = readData('../data/dati_Moody.csv');      % reading input data
 
 DR_mean = mean(data.DR_SG);              % default rate speculative grade
 DR_std  = std(data.DR_SG);               % mean and standard deviation
@@ -34,7 +34,7 @@ CL2 = 0.999;                             % confidence level 99.9 %
 
 idiosyncraticRisk = randn(N_sim,N_ob);   % simulation of idiosyncratic risk
 systematicRisk    = randn(N_sim,1);      % simulation of systematic risk
-        
+
 %% A
   % i. Using mean correlation
 disp('Capital requirement nominal model')
@@ -74,13 +74,13 @@ d = norminv(data.DR_SG);           % default barrier speculative grade
 
 % Shapiro wilk normality tests
 disp('Default barrier normality')
-[H_d,pValue_d] = swtest(d)   
+[H_d,pValue_d] = swtest(d)
 disp('Recovery rate normality')
 [H_RR,pValue_RR] = swtest(data.RR)
 
 %% B.2 - B.3 simulations required
 
-[d_mean,d_std] = normfit(d);     
+[d_mean,d_std] = normfit(d);
 d_sim = d_mean + randn(N_sim,1)*d_std;      % simulated default barriers
 DR_sim = normcdf(d_sim);                    % simulated default rates
 
@@ -121,7 +121,7 @@ CR_LHP_CL2_d = CapitalRequirementAlternativeLHP(RR_mean,DR_sim,...
 CR_LHP_CL2_RR = CapitalRequirementAlternativeLHP(RR_sim,DR_mean,...
                rho_mean,CL2,systematicRisk);  % recovery rate
 CR_LHP_CL2_rho = CapitalRequirementAlternativeLHP(RR_mean,DR_mean,...
-               rho_sim,CL2,systematicRisk);   % correlation 
+               rho_sim,CL2,systematicRisk);   % correlation
 CR_LHP_CL2_d_rho = CapitalRequirementAlternativeLHP(RR_mean,DR_sim,...
                rho_sim,CL2,systematicRisk);   % default rate and corr
 CR_LHP_CL2_all = CapitalRequirementAlternativeLHP(RR_sim,DR_sim,...
@@ -148,7 +148,7 @@ CR_HP_CL1_rho = CapitalRequirementAlternativeHP(RR_mean,DR_mean,rho_sim,...
 CR_HP_CL1_d_rho = CapitalRequirementAlternativeHP(RR_mean,DR_sim,rho_sim,...
         CL1,systematicRisk,idiosyncraticRisk);  % default rate and corr
 CR_HP_CL1_all = CapitalRequirementAlternativeHP(RR_sim,DR_sim,rho_sim,...
-        CL1,systematicRisk,idiosyncraticRisk);  % all parameters 
+        CL1,systematicRisk,idiosyncraticRisk);  % all parameters
 
 % Capital Requirement alternative models, HP, confidence level 99.0 %
 CRalt_HP_CL1 = [CR_HP_CL1_d;CR_HP_CL1_RR ;CR_HP_CL1_rho;...
@@ -178,7 +178,7 @@ disp(table(CRalt_HP_CL1,CRalt_HP_CL2,addOn_HP_CL1,addOn_HP_CL2,...
             'RowNames',{'d','RR','rho','d_rho','All'},...
             'VariableNames',{'CR_99','CR_999','AddOn_99','AddOn_999'}))
 
-%% B.3 
+%% B.3
 
 disp('Capital Requirement & Add On frequentist inference, basel correlation')
 % LHP
@@ -219,7 +219,7 @@ CR_HP_CL1_B_d = CapitalRequirementAlternativeHP(RR_mean,DR_sim,...
    rho_sim_B,CL1,systematicRisk,idiosyncraticRisk);  % default rate
 CR_HP_CL1_B_RR = CapitalRequirementAlternativeHP(RR_sim,DR_mean,...
    rho_B_mean,CL1,systematicRisk,idiosyncraticRisk); % recovery rate
-CR_HP_CL1_B_d_RR = CapitalRequirementAlternativeHP(RR_sim,DR_sim,...  
+CR_HP_CL1_B_d_RR = CapitalRequirementAlternativeHP(RR_sim,DR_sim,...
    rho_sim_B,CL1,systematicRisk,idiosyncraticRisk);  % default and recovery
 
 % Capital Requirement alternative models, HP, confidence level 99.0%, Basel
@@ -300,7 +300,29 @@ CapitalRequirementAlternativeHP(...
 
 figure
 plot(norminv(data.DR_AR),data.RR,'*')
-xlabel('d')
-ylabel('\pi')
+hold on
+plot(norminv(data.DR_SG),data.RR,'*')
+xlabel('DefaultBarrier')
+legend('AllGrade','SpeculativeGrade')
+grid on
+ylabel('Recovery')
 
-[B,BINT,R] = regress(norminv(data.DR_AR),data.RR)
+[r,m,b] = regression(norminv(data.DR_AR)',data.RR','one');
+plotregression(norminv(data.DR_AR),data.RR)
+
+%%
+
+d_sim   = mcmc(0.5,@(x) log(normpdf(x)),@(x) sum(log(normpdf(d,x,d_std))),0.2,N_sim/100);
+
+[mu_post,std_post]=normfit(d_sim);
+
+DR_Sim = normcdf(d_sim);
+
+CapitalRequirementAlternativeLHP(RR_mean,DR_Sim,rho_mean,CL1,randn(N_sim/100,1))/CR_LHP_CL1-1
+
+%% Sobol Indices
+
+% INPUT PARAMETERS ARE NOT INDEPENDENT
+% FIX CORRELATION (NO DATA FOR CORRELATION)
+
+[Default_S1, Recovery_S2, Correlation_S3] = SobolInidices(data.DR_SG,data.RR)

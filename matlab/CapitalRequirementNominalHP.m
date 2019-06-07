@@ -37,8 +37,8 @@ P        = prob_m(M);       % probability of m defaults for m = 0:nObligors
 P_cum = cumsum(P);          % cumulative density function of P
 idx = min(find(P_cum>=confidenceLevel))-1; % quantile index
 
-valueAtRisk  = idx*exposureAtDefault*lossGivenDefault;
 expectedLoss = exposureAtDefault*P'*M*lossGivenDefault;
+valueAtRisk = idx*exposureAtDefault*lossGivenDefault;
 
 CapitalRequirement = valueAtRisk - expectedLoss;
 
