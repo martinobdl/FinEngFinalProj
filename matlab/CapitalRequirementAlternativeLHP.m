@@ -1,29 +1,30 @@
 function CapitalRequirement = CapitalRequirementAlternativeLHP(...
-recoveryRate,defaultRate,correlation,confidenceLevel,systematicRisk)
-% CapitalRequrement = CapitalRequirementNominalLHP(recoveryRate,...
-%defaultRate,correlation,confidenceLevel)
-% Computes the Capital Requirement in the case of a Large Homogeneous
-% Portfolio given the common recovery, dafualt probability and correlation
-% at the required confidence level.
+             recoveryRate,defaultRate,correlation,confidenceLevel,...
+             systematicRisk)
+% CapitalRequrement = CAPITALREQUIREMENTALTERNATIVELHP(recoveryRate,
+% defaultRate,correlation,confidenceLevel,systematicRisk)
 %
-% @inputs: recoveryRate,defaultRate,correlation,confidenceLevel
+% Computes the Capital Requirement in the case of a Large Homogeneous 
+% Portfolio given the recovery, default probability and correlation at the
+% required confidence level. Inputs can be vectors.
 %
-% @outputs: CapitalRequrement
+% @inputs:        - recoveryRate:      scalar or N_sim x 1 vector
+%                 - defaultRate:       scalar or N_sim x 1 vector
+%                 - correlation:       scalar or N_sim x 1 vector 
+%                 - confidenceLevel:   scalar
+%                 - systematicRisk:    N_sim x 1 vector
 %
-
-%% simulation
+% @outputs:       - CapitalRequirement: scalar
 
 defaultBarrier = norminv(defaultRate);
 
-%% Loss
-
-loss = (1-recoveryRate).*normcdf((defaultBarrier - sqrt(correlation).*systematicRisk)./sqrt(1-correlation));
-
-%% VaR and CR
+loss = (1-recoveryRate).*normcdf((defaultBarrier -...
+            sqrt(correlation).*systematicRisk)./sqrt(1-correlation));
 
 VaR = prctile(loss,confidenceLevel*100);
-meanLoss = mean(loss);
-CapitalRequirement = VaR - meanLoss;
+expectedLoss = mean(loss);
+
+CapitalRequirement = VaR - expectedLoss;
 
 end
 
