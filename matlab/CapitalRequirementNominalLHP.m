@@ -10,16 +10,15 @@ function CapitalRequirement = CapitalRequirementNominalLHP(recoveryRate,...
 %                 - defaultRate:       scalar
 %                 - correlation:       scalar 
 %                 - confidenceLevel:   scalar
-%
 % @outputs:       - CapitalRequirement: scalar
 
 lossGivenDefault = (1-recoveryRate);
 defaultBarrier   = norminv(defaultRate);
 
-valueAtRisk  = lossGivenDefault.*normcdf((defaultBarrier-...
+valueAtRisk      = lossGivenDefault.*normcdf((defaultBarrier-...
                         sqrt(correlation).*norminv(1-confidenceLevel))./...
                         sqrt(1-correlation));
-expectedLoss = lossGivenDefault.*defaultRate;
+expectedLoss     = lossGivenDefault.*defaultRate;
 
 CapitalRequirement = valueAtRisk - expectedLoss;
 

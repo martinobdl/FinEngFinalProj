@@ -14,9 +14,7 @@ function CapitalRequirement = CapitalRequirementAlternativeHP(...
 %                 - confidenceLevel:   scalar
 %                 - systematicRisk:    N_sim x 1 vector
 %                 - idiosyncraticRisk: N_sim x N_ob matrix
-%
 % @outputs:       - CapitalRequirement: scalar
-
 
 nObligors          = size(idiosyncraticRisk,2);
 exposureAtDefault  = 1/nObligors;

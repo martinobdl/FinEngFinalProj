@@ -8,9 +8,8 @@ function d_CRstd = CramerRao_d(correlation, defaultBarrier, nObligors,T)
 %                - defaultBarrier: scalar or 1xBx1 matrix
 %                - nObligors: scalar
 %                - T: time parameter
-%
 % @outputs       - d_CRstd: scalar or AxB matrix, each row corresponds to a
-%                   correlation, each row to a value of defaultBarrier
+%                   correlation, each column to a value of defaultBarrier
 
 epsilon = 1e-6;                        % increment of independent variable
 
@@ -44,9 +43,10 @@ secondDerivativeLL = (LL_plus-2.*LL_central+LL_minus)./epsilon^2;
 if sum(sum(sum(isnan(secondDerivativeLL))))>0
     error("loglikelihood value goes to infinity, choose other input value")
 end
+
 % AxBx1 matrix of expected second derivative
 expected = sum(secondDerivativeLL.*P_central,3); 
-% Cramer-Rao limit 
+% Cramer-Rao limit, standard deviation
 d_CRstd = sqrt(-expected.^-1./T);
 
 end

@@ -6,7 +6,7 @@ clc
 rng('default')
 %% INPUT
 
-data = readData('../data/dati_Moody.csv');      % reading input data
+data = readData('../data/dati_Altman.csv');      % reading input data
 
 n = length(data.years);                  % number of data
 
@@ -29,11 +29,11 @@ rho_mean = 0.0924;                       % obligors correlation
 rho_std  = 0.0386;                       % mean and standard deviation
 rho_B = correlationFromBasel2(DR_mean);  % Basel correlation
 
-N_ob  = 50;                              % number of obligors
+N_ob  = 60;                              % number of obligors
 N_sim = 1e6;                             % number of simulations
 
-% CL = 0.99;                               % confidence level 99.0 %
-CL  = 0.999;                             % confidence level 99.9 %
+CL = 0.99;                               % confidence level 99.0 %
+% CL  = 0.999;                             % confidence level 99.9 %
 
 idiosyncraticRisk = randn(N_sim,N_ob);   % simulation of idiosyncratic risk
 systematicRisk    = randn(N_sim,1);      % simulation of systematic risk

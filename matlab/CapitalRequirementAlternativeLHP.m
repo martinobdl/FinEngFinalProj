@@ -13,18 +13,17 @@ function CapitalRequirement = CapitalRequirementAlternativeLHP(...
 %                 - correlation:       scalar or N_sim x 1 vector 
 %                 - confidenceLevel:   scalar
 %                 - systematicRisk:    N_sim x 1 vector
-%
 % @outputs:       - CapitalRequirement: scalar
 
 defaultBarrier = norminv(defaultRate);
 
-loss = (1-recoveryRate).*normcdf((defaultBarrier -...
-            sqrt(correlation).*systematicRisk)./sqrt(1-correlation));
+loss           = (1-recoveryRate).*normcdf((defaultBarrier -...
+                  sqrt(correlation).*systematicRisk)./sqrt(1-correlation));
 
-VaR = prctile(loss,confidenceLevel*100);
-expectedLoss = mean(loss);
+valueAtRisk    = prctile(loss,confidenceLevel*100);
+expectedLoss   = mean(loss);
 
-CapitalRequirement = VaR - expectedLoss;
+CapitalRequirement = valueAtRisk - expectedLoss;
 
 end
 

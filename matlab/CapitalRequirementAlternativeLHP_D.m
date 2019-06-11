@@ -1,7 +1,7 @@
 function CapitalRequirement = CapitalRequirementAlternativeLHP_d(...
              recoveryRate,defaultRate,defaultBarrierMean,...
              defaultBarrierStd,correlation,confidenceLevel)
-% CapitalRequrement = CAPITALREQUIREMENTALTERNATIVELHP_d(recoveryRate,
+% CapitalRequrement = CAPITALREQUIREMENTALTERNATIVELHP_D(recoveryRate,
 % defaultRAte,defaultBarrierMean,defaultBarrierStd,correlation,
 % confidenceLevel)
 
@@ -16,15 +16,14 @@ function CapitalRequirement = CapitalRequirementAlternativeLHP_d(...
 %                 - defaultBarrierStd: scalar
 %                 - correlation:       scalar 
 %                 - confidenceLevel:   scalar
-%
 % @outputs:       - CapitalRequirement: scalar
 
 lossGivenDefault = (1-recoveryRate);
 
-valueAtRisk = lossGivenDefault.*normcdf((defaultBarrierMean - ...
+valueAtRisk      = lossGivenDefault.*normcdf((defaultBarrierMean - ...
     sqrt(correlation+defaultBarrierStd^2).*norminv(1-confidenceLevel))./...
     sqrt(1-correlation));
-expectedLoss = lossGivenDefault.*defaultRate;
+expectedLoss     = lossGivenDefault.*defaultRate;
 
 CapitalRequirement = valueAtRisk - expectedLoss;
 

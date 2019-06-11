@@ -1,38 +1,52 @@
-function expectedLL = ExpectedSecondDerivativeLL(correlation, defaultBarrier, nObligors)
+function d_CRstd = CramerRao_d(correlation, defaultBarrier, nObligors,T)
+% expectedLL = CRAMERRAO_D(correlation, defaultBarrier, nObligors,T)
+%
+% Computes the Cramer-Rao standard deviation limit for the d default
+% barrier threshold in the points specified by defaultBarrier, correlation
+%
+% @inputs:       - correlation: scalar or Ax1x1 matrix
+%                - defaultBarrier: scalar or 1xBx1 matrix
+%                - nObligors: scalar
+%                - T: time parameter
+%
+% @outputs       - d_CRstd: scalar or AxB matrix, each row corresponds to a
+%                   correlation, each row to a value of defaultBarrier
 
+epsilon = 1e-6;             % optiamal increment of independent variable
 
-epsilon = 1e-6;
+X(1,1,1:nObligors+1) = (0:nObligors);  % matrix 1x1xC number of defaults
+binomialcoef = factorial(nObligors)/...% matrix 1x1xC binomial coefficients
+    (factorial(X).*factorial(nObligors-X));
 
-defaultBarrier_pluseps = defaultBarrier + epsilon;
-defaultBarrier_mineps = defaultBarrier - epsilon;
-binomialcoef = @(N,n) factorial(N)./(factorial(n).*factorial(N-n));
+p = @(s,y) normcdf((defaultBarrier+s*epsilon-sqrt(correlation)*y)./...
+            (sqrt(1-correlation)));    % AxBx1 matrix of handle functions
+                                       % Probabilities of 1 default given y
+integrand = @(s,y) (p(s,y).^X).*(1-p(s,y)).^(nObligors-X).*binomialcoef; 
+                                       % AxBxC matrix of handle functions
+                                       % Probabilities X defaults given y
+P = @(s) integral(@(y) normpdf(y).*integrand(s,y),-30,30,...
+            'ArrayValued',true);       % AxBxC matrix of handle functions
+                                       % Probabilities of X defaults
 
-p = @(y) normcdf((defaultBarrier-sqrt(correlation)*y)/...
-                        (sqrt(1-correlation)));
-p_plus = @(y) normcdf((defaultBarrier_pluseps-sqrt(correlation)*y)/...
-                        (sqrt(1-correlation)));
-p_min = @(y) normcdf((defaultBarrier_mineps-sqrt(correlation)*y)/...
-                        (sqrt(1-correlation)));
+% AxBxC matrices of probabilities, where each dimension corresponds to
+% A-> correlation, B-> defaultBarriers, C-> number of defaults X
+P_central = P(0);    % without change on defaultBarrier
+P_plus = P(1);       % with indrement on defaultBarrier of epsilon
+P_minus = P(-1);     % with decrement on defaultBarrier of -epsilon
 
-cond_law = @(y,m) (p(y).^m).*(1-p(y)).^(nObligors-m).*binomialcoef(nObligors,m);
-cond_law_plus = @(y,m) (p_plus(y).^m).*(1-p_plus(y)).^(nObligors-m).*binomialcoef(nObligors,m);
-cond_law_min = @(y,m) (p_min(y).^m).*(1-p_min(y)).^(nObligors-m).*binomialcoef(nObligors,m);
+% Logarithm of the above matrices -> LogLikelihood 
+LL_central = log(P_central);
+LL_plus = log(P_plus);
+LL_min = log(P_min);
 
-m=(0:nObligors)';
+secondDerivativeLL = (LL_pluseps-2.*LL_central+LL_mineps)./epsilon^2;
 
-P_m = integral(@(y) normpdf(y).*cond_law(y,m),-30,30,'ArrayValued',true);
-P_m_plus = integral(@(y) normpdf(y).*cond_law_plus(y,m),-30,30, 'ArrayValued',true);
-P_m_min = integral(@(y) normpdf(y).*cond_law_min(y,m),-30,30,'ArrayValued',true);
+if sum(isnan(secondDerivativeLL))>0
+    error("loglikelihood value goes to infinity, choose other input value")
+end
+% AxBx1 matrix of expected second derivative
+expected = sum(second.*P_central,3); 
 
-LL = log(P_m);
-LL_pluseps = log(P_m_plus);
-LL_mineps = log(P_m_min);
-
-first_plus = (LL_pluseps-LL)./epsilon;
-first_min = (LL-LL_mineps)./epsilon;
-
-second = (first_plus - first_min)./epsilon;
-
-expectedLL = second'*P_m;
+d_CRstd = sqrt(-expecter.^-1./T);
 
 end
