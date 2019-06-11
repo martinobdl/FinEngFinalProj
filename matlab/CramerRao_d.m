@@ -21,7 +21,7 @@ binomialcoef = factorial(nObligors)/...% matrix 1x1xC binomial coefficients
 p = @(s,y) normcdf((defaultBarrier+s*epsilon-sqrt(correlation)*y)./...
             (sqrt(1-correlation)));    % AxBx1 matrix of handle functions
                                        % Probabilities of 1 default given y
-integrand = @(s,y) (p(s,y).^X).*(1-p(s,y)).^(nObligors-X).*binomialcoef; 
+integrand = @(s,y) (p(s,y).^X).*(1-p(s,y)).^(nObligors-X).*binomialcoef;
                                        % AxBxC matrix of handle functions
                                        % Probabilities X defaults given y
 P = @(s) integral(@(y) normpdf(y).*integrand(s,y),-30,30,...
@@ -34,7 +34,7 @@ P_central = P(0);    % without change on defaultBarrier
 P_plus = P(1);       % with indrement on defaultBarrier of epsilon
 P_minus = P(-1);     % with decrement on defaultBarrier of -epsilon
 
-% Logarithm of the above matrices -> LogLikelihood 
+% Logarithm of the above matrices -> LogLikelihood
 LL_central = log(P_central);
 LL_plus = log(P_plus);
 LL_minus = log(P_minus);
@@ -45,8 +45,8 @@ if sum(sum(sum(isnan(secondDerivativeLL))))>0
     error("loglikelihood value goes to infinity, choose other input value")
 end
 % AxBx1 matrix of expected second derivative
-expected = sum(secondDerivativeLL.*P_central,3); 
-% Cramer-Rao limit 
+expected = sum(secondDerivativeLL.*P_central,3);
+% Cramer-Rao limit
 d_CRstd = sqrt(-expected.^-1./T);
 
 end

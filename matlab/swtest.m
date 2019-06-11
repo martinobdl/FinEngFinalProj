@@ -3,10 +3,10 @@ function [H, pValue, W] = swtest(x, alpha)
 %   [H, pValue, SWstatistic] = SWTEST(X, ALPHA) performs the
 %   Shapiro-Wilk test to determine if the null hypothesis of
 %   composite normality is a reasonable assumption regarding the
-%   population distribution of a random sample X. The desired significance 
+%   population distribution of a random sample X. The desired significance
 %   level, ALPHA, is an optional scalar input (default = 0.05).
 %
-%   The Shapiro-Wilk and Shapiro-Francia null hypothesis is: 
+%   The Shapiro-Wilk and Shapiro-Francia null hypothesis is:
 %   "X is normal with unspecified mean and variance."
 %
 %   This is an omnibus test, and is generally considered relatively
@@ -18,7 +18,7 @@ function [H, pValue, W] = swtest(x, alpha)
 %   When the series 'X' is Leptokurtic, SWTEST performs the Shapiro-Francia
 %   test, else (series 'X' is Platykurtic) SWTEST performs the
 %   Shapiro-Wilk test.
-% 
+%
 %    [H, pValue, SWstatistic] = SWTEST(X, ALPHA)
 %
 % Inputs:
@@ -27,7 +27,7 @@ function [H, pValue, W] = swtest(x, alpha)
 %
 % Optional inputs:
 %   ALPHA - The significance level for the test (default = 0.05).
-%  
+%
 % Outputs:
 %  SWstatistic - The test statistic (non normalized).
 %
@@ -97,7 +97,7 @@ if length(x) > 5000
 end
 
 %
-% Ensure the significance level, ALPHA, is a 
+% Ensure the significance level, ALPHA, is a
 % scalar, and set default if necessary.
 %
 
@@ -106,7 +106,7 @@ if (nargin >= 2) && ~isempty(alpha)
       error(' Significance level ''Alpha'' must be a scalar.');
    end
    if (alpha <= 0 || alpha >= 1)
-      error(' Significance level ''Alpha'' must be between 0 and 1.'); 
+      error(' Significance level ''Alpha'' must be between 0 and 1.');
    end
 else
    alpha  =  0.05;
@@ -122,9 +122,9 @@ mtilde  =   norminv(((1:n)' - 3/8) / (n + 1/4));
 weights =   zeros(n,1); % Preallocate the weights.
 
 if kurtosis(x) > 3
-    
+
     % The Shapiro-Francia test is better for leptokurtic samples.
-    
+
     weights =   1/sqrt(mtilde'*mtilde) * mtilde;
 
     %
@@ -149,12 +149,12 @@ if kurtosis(x) > 3
     %
 
     NormalSFstatistic =   (newSFstatistic - mu) / sigma;
-    
+
     % Computes the p-value, Royston (1993a, p. 183).
     pValue   =   1 - normcdf(NormalSFstatistic, 0, 1);
-    
+
 else
-    
+
     % The Shapiro-Wilk test is better for platykurtic samples.
 
     c    =   1/sqrt(mtilde'*mtilde) * mtilde;
@@ -174,11 +174,11 @@ else
 
     weights(n)   =   polyval(PolyCoef_1 , u);
     weights(1)   =   -weights(n);
-    
+
     if n > 5
         weights(n-1) =   polyval(PolyCoef_2 , u);
         weights(2)   =   -weights(n-1);
-    
+
         count  =   3;
         phi    =   (mtilde'*mtilde - 2 * mtilde(n)^2 - 2 * mtilde(n-1)^2) / ...
                 (1 - 2 * weights(n)^2 - 2 * weights(n-1)^2);
@@ -187,7 +187,7 @@ else
         phi    =   (mtilde'*mtilde - 2 * mtilde(n)^2) / ...
                 (1 - 2 * weights(n)^2);
     end
-        
+
     % Special attention when n = 3 (this is a special case).
     if n == 3
         % Royston (1992, p. 117)
@@ -218,20 +218,20 @@ else
     newn    =   log(n);
 
     if (n >= 4) && (n <= 11)
-    
+
         mu      =   polyval(PolyCoef_3 , n);
-        sigma   =   exp(polyval(PolyCoef_4 , n));    
+        sigma   =   exp(polyval(PolyCoef_4 , n));
         gam     =   polyval(PolyCoef_7 , n);
-    
+
         newSWstatistic  =   -log(gam-log(1-W));
-    
+
     elseif n > 11
-    
+
         mu      =   polyval(PolyCoef_5 , newn);
         sigma   =   exp(polyval(PolyCoef_6 , newn));
-    
+
         newSWstatistic  =   log(1 - W);
-    
+
     elseif n == 3
         mu      =   0;
         sigma   =   1;
@@ -243,23 +243,23 @@ else
     %
 
     NormalSWstatistic   =   (newSWstatistic - mu) / sigma;
-    
+
     % NormalSWstatistic is referred to the upper tail of N(0,1),
     % Royston (1992, p. 119).
     pValue       =   1 - normcdf(NormalSWstatistic, 0, 1);
-    
+
     % Special attention when n = 3 (this is a special case).
     if n == 3
         pValue  =   6/pi * (asin(sqrt(W)) - asin(sqrt(3/4)));
         % Royston (1982a, p. 121)
     end
-    
+
 end
 
 %
 % To maintain consistency with existing Statistics Toolbox hypothesis
-% tests, returning 'H = 0' implies that we 'Do not reject the null 
-% hypothesis at the significance level of alpha' and 'H = 1' implies 
+% tests, returning 'H = 0' implies that we 'Do not reject the null
+% hypothesis at the significance level of alpha' and 'H = 1' implies
 % that we 'Reject the null hypothesis at significance level of alpha.'
 %
 

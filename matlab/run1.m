@@ -4,6 +4,7 @@ clear all
 close all
 clc
 rng('default')
+
 %% INPUT
 
 data = readData('../data/dati_Moody.csv');      % reading input data
@@ -325,4 +326,17 @@ CapitalRequirementAlternativeLHP(RR_mean,DR_Sim,rho_mean,CL1,randn(N_sim/100,1))
 % INPUT PARAMETERS ARE NOT INDEPENDENT
 % FIX CORRELATION (NO DATA FOR CORRELATION)
 
-[Default_S1, Recovery_S2, Correlation_S3] = SobolInidices(data.DR_SG,data.RR)
+Covariance = cov(norminv(data.DR_SG),data.RR);
+Covariance(1,2)=0;Covariance(2,1)=0;
+mu12 = mean([norminv(data.DR_SG),data.RR]);
+a = 5.1083;
+b = 50.1766;
+
+sim12 = mvnrnd(mu12,Covariance,N_sim);
+sim1 = sim12(:,1);          %barrier
+sim2 = sim12(:,2);          %recovery 
+sim3 = betarnd(a,b,N_sim,1); %correlation
+parameterSim = [sim1,sim2,sim3];
+%parameterSim = rand(N_sim,3);
+
+[S1,V] = SobolInidices(parameterSim)

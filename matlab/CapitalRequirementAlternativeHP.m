@@ -10,7 +10,7 @@ function CapitalRequirement = CapitalRequirementAlternativeHP(...
 %
 % @inputs:        - recoveryRate:      scalar or N_sim x 1 vector
 %                 - defaultRate:       scalar or N_sim x 1 vector
-%                 - correlation:       scalar or N_sim x 1 vector 
+%                 - correlation:       scalar or N_sim x 1 vector
 %                 - confidenceLevel:   scalar
 %                 - systematicRisk:    N_sim x 1 vector
 %                 - idiosyncraticRisk: N_sim x N_ob matrix
@@ -29,7 +29,7 @@ numberOfDefaults   = sum(firmValues < defaultBarrier,2);
 
 loss               = exposureAtDefault.*lossGivenDefault.*numberOfDefaults;
 
-valueAtRisk        = prctile(loss,confidenceLevel*100); 
+valueAtRisk        = prctile(loss,confidenceLevel*100);
 expectedLoss       = mean(loss);
 
 CapitalRequirement = valueAtRisk - expectedLoss;
