@@ -90,3 +90,11 @@ def CramerRao_rho(Nob,rho_vect,T):
 
     return np.sqrt((2*(1-rho_vect)**2*(1+(Nob-1)*rho_vect)**2)/\
         (T*Nob*(Nob-1)))
+
+def bayesianPrediction(x_vect,p_vect,p_distr,handlef):
+    n = len(x_vect)
+    x_dd = np.zeros(n)
+    for i in range(n):
+        x_dd[i] = np.trapz(handlef(x_vect[i])*p_distr,p_vect)
+
+    return x_dd/np.trapz(x_dd,x_vect)

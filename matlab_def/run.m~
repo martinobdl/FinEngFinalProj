@@ -210,11 +210,11 @@ d_std_post = std(d)/sqrt(T+var(d));        % posterior standard deviation
      
 d_vect    = linspace(-4,4,2001);                % equispaced row vector
 posterior_d = normpdf(d_vect,d_mean_post,d_std_post);% posterior evaluated on d_vect
-xd_vect = linspace(-5,5,1000);              
+d_vect = linspace(-5,5,1000);              
 f_x_d = @(x) normpdf(x,d_vect,d_std);           % density of x given mean(unknown) and std
-d_pdf = bayesianPrediction(xd_vect,d_vect,posterior_d,f_x_d); % density of X conditioned on data
+d_pdf = bayesianPrediction(d_vect,d_vect,posterior_d,f_x_d); % density of X conditioned on data
 
-d_sim_bayes  = samplingFromPosterior(N_sim,xd_vect,d_pdf);   % simulated d from posterior
+d_sim_bayes  = samplingFromPosterior(N_sim,d_vect,d_pdf);   % simulated d from posterior
 DefRate_sim_bayes = normcdf(d_sim_bayes);               % simulated default rate
 
      % ii. Of correlation rho
@@ -266,10 +266,8 @@ addOnB_HP = RCaltB_HP./RC_HP - 1;
 disp(table(RCaltB_HP,addOnB_HP,...
     'RowNames',{'d','rho','all'},...
     'VariableNames',{'Regulatory_Capital','Add_On'}))
-
   %% C.3 Posterior distributions fixing variance equal to Cramer Rao
-%-------------------------high computational cost-------------------------% 
-
+%-------------------------high computational cost-------------------------%   
      % i. Of threshold d
 d_surf   = linspace(-4,4,81);                   % grid on which d_stdCR is  
 rho_surf = linspace(0,0.999,19)';               % computed, rho and d
@@ -278,47 +276,45 @@ rho_surf = linspace(0,0.999,19)';               % computed, rho and d
 CramerRao_surf  = CramerRao_d(rho_surf,d_surf,N_obligors,T);% Cramer Rao standard dev
 CRsurface = struct('rho',rho_surf,'d',d_surf,'surf',CramerRao_surf);
 
-d_vect    = linspace(-4,4,2001);                % equispaced row vector
 d_CramerRao_std   = interp2(d_surf,rho_surf,CramerRao_surf,... % Cramer Rao stdev row
                     d_vect,rho_mean,'spline');  % on d_vect
-posterior_d_CramerRao    = posteriorDistributionD(d_hat,d_vect,d_CramerRao_std); % posterior distribution d
-
+poeterior_d_CramerRao    = posteriorDistributionD(d_hat,d_vect,d_CramerRao_std); % posterior distribution d
  % distribution of X - default barriers     
-xd_vect = linspace(-5,5,1000);              
-f_x_d_CramerRao = @(x) normpdf(x,d_vect,d_std);           % density of x given mean(unknown) and std
-d_pdf_CramerRao = bayesianPrediction(xd_vect,d_vect,posterior_d_CramerRao,f_x_d_CramerRao); % density of X conditioned on data
+d_vect = linspace(-5,5,1000);              
+f_x_dCR = @(x) normpdf(x,d_vect,d_std);           % density of x given mean(unknown) and std
+xd_pdfCR = bayesianPrediction(d_vect,d_vect,poeterior_d_CramerRao,f_x_dCR); % density of X conditioned on data
 
-d_sim_bates_CramerRao  = samplingFromPosterior(N_sim,xd_vect,d_pdf_CramerRao);   % simulated d from its density
-DefRate_sim_bayes_CramerRao = normcdf(d_sim_bates_CramerRao);                  % simulated default rate
+d_sim_bCR  = samplingFromPosterior(N_sim,d_vect,xd_pdfCR);   % simulated d from its density
+DR_sim_bCR = normcdf(d_sim_bCR);                  % simulated default rate
 
    %  ii. Of correlation rho
 rho_vect  = linspace(0.005,0.995,1980);         % equispaced column vector
-rho_CramerRao_std = CramerRao_rho(10891,rho_vect,30);   % Cramer Rao stdev 
-[aaCR,bbCR] = betaParameter(rho_vect,rho_CramerRao_std);  % A and B beta parameters 
-hposterior_rho_CR  = posteriorDistributionRho(rho_mean,rho_vect,aaCR,bbCR); % posterior distribution  on rho_vect
+rho_CRstd = CramerRao_rho(10891,rho_vect,30);   % Cramer Rao stdev 
+[aaCR,bbCR] = betaParameter(rho_vect,rho_CRstd);  % A and B beta parameters 
+h_rho_CR  = posteriorDistributionRho(rho_mean,rho_vect,aaCR,bbCR); % posterior distribution  on rho_vect
      % distribution of X - correlation   
 xrho_vect = linspace(0.005,0.995,1000);              
 f_x_rhoCR = @(x) betapdf(x,aa,bb);           % density of x given mean (unknown) and empirical std 
 
-rho_pdf_CramerRao = bayesianPrediction(xrho_vect,rho_vect,hposterior_rho_CR,f_x_rhoCR); % density of X conditioned on data
+xrho_pdfCR = bayesianPrediction(xrho_vect,rho_vect,h_rho_CR,f_x_rhoCR); % density of X conditioned on data
 
-rho_sim_bayes_CramerRao = samplingFromPosterior(N_sim,xrho_vect,rho_pdf_CramerRao); % simulated correlation
+rho_sim_bCR = samplingFromPosterior(N_sim,xrho_vect,xrho_pdfCR); % simulated correlation
 
     % iii. nested simulation
 
 n_rho = 1e3;                          % number of rho         
 n_d   = 1e3;                          % number of d for each rho
-rho_tmp = samplingFromPosterior(n_rho,xrho_vect,rho_pdf_CramerRao); 
+rho_tmp = samplingFromPosterior(n_rho,xrho_vect,xrho_pdfCR); 
 
 [rho_nested, DR_nested]=nestedSimulation(d_hat,d_std,n_d,CRsurface,rho_tmp);
   %% C.4 Regulatory Capital & Add on
   
 disp('Homogeneous Portfolio, Cramer Rao')
 % Computing Regulatory Capitals simulating different parameters HP CL
-RCb_HP_d_CR = CapitalRequirementAlternativeHP(RecRate_mean,DefRate_sim_bayes_CramerRao,...
+RCb_HP_d_CR = CapitalRequirementAlternativeHP(RecRate_mean,DR_sim_bCR,...
     rho_mean,CL,systematicRisk,idiosyncraticRisk);    % default rate
 RCb_HP_rho_CR = CapitalRequirementAlternativeHP(RecRate_mean,DefRate_mean,...
-    rho_sim_bayes_CramerRao,CL,systematicRisk,idiosyncraticRisk); % correlation
+    rho_sim_bCR,CL,systematicRisk,idiosyncraticRisk); % correlation
 RC_HP_allB_CR = CapitalRequirementAlternativeHP(RecRate_mean,DR_nested,...
     rho_nested,CL,systematicRisk,idiosyncraticRisk);  % all
 
@@ -330,13 +326,13 @@ addOnB_HP = RCaltB_HP./RC_HP - 1 ;
 disp(table(RCaltB_HP,addOnB_HP,...
     'RowNames',{'d','rho','all'},...
     'VariableNames',{'Regulatory_Capital','Add_On'}))
-
 %% Sobol Inidices
 
 Covariance = cov(norminv(data.DR_SG),data.RR);
 Covariance(1,2)=0;Covariance(2,1)=0;
 mu12 = mean([norminv(data.DR_SG),data.RR]);
-[a,b] = betaParameter(rho_mean,rho_std);
+a = 5.1083;
+b = 50.1766;
 
 sim12 = mvnrnd(mu12,Covariance,N_sim);
 sim1 = sim12(:,1);              %barrier

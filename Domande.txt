@@ -1,5 +1,0 @@
-1. punto facoltativo: bisogna replicare gli altri punti?
-2. punto A: Come hanno usato i dati della tabella di Altman?
-3. punto B: Come è stato fatto l'istogramma a p.7 di [1], ossia in che modo è stata ricavata la distribuzione di rho?
-4. Figura 3a. Penso che \rho\in(\epsilon,1-\epsilon) e che \hat\rho\in(0,1). Mentre dal grafico sembra il contrario. Questo perché non posso trovare a,b di una gamma tale che la sua media sia \rho=0 in eq 12. Sono gli assi del grafico invertiti? In altre parle h(\rho,\hat{\rho}) non è una beta vero?
-5. Come campionare dalla cdf, vettore di cdf(x) 

@@ -120,6 +120,3 @@ def CapitalRequirementAlternativeHP(
 
     return CapitalRequirement
 
-def beyesianPrediction():
-
-
