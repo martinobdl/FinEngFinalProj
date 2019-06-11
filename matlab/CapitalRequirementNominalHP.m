@@ -1,6 +1,6 @@
 function CapitalRequirement = CapitalRequirementNominalHP(recoveryRate,...
              defaultRate,correlation,confidenceLevel,nObligors)
-% CapitalRequirement = CapitalRequirementNominalHP(recoveryRate,
+% CapitalRequirement = CAPITALREQUIREMENTNOMINALHP(recoveryRate,
 % defaultRate,correlation,confidenceLevel,nObligors)
 %
 % Computes the capital requirement for a Homogeneous Portfolio, given 
@@ -11,7 +11,6 @@ function CapitalRequirement = CapitalRequirementNominalHP(recoveryRate,...
 %                 - correlation:       scalar 
 %                 - confidenceLevel:   scalar
 %                 - nObligors:         scalar
-%
 % @outputs:       - CapitalRequirement: scalar
  
 exposureAtDefault   = 1/nObligors;
@@ -35,10 +34,10 @@ M        = (0:nObligors)';  % vector of possible number of defaults
 P        = prob_m(M);       % probability of m defaults for m = 0:nObligors
 
 P_cum = cumsum(P);          % cumulative density function of P
-idx = min(find(P_cum>=confidenceLevel))-1; % quantile index
+idx   = min(find(P_cum>=confidenceLevel))-1; % quantile index
 
 expectedLoss = exposureAtDefault*P'*M*lossGivenDefault;
-valueAtRisk = idx*exposureAtDefault*lossGivenDefault;
+valueAtRisk  = idx*exposureAtDefault*lossGivenDefault;
 
 CapitalRequirement = valueAtRisk - expectedLoss;
 

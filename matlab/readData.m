@@ -1,13 +1,12 @@
 function data = readData(fileName)
-% data = readData()
-% Read the data file into a struct with
-% year, specultaive grade default rate, total defalut rate
-% and recovery rate.
+% data = READDATA()
 %
-% @inputs: fileName: file name of the file to read
+% Read the data file into a struct with year, specultaive grade default
+% rate, all rates defalut rate and recovery rate.
 %
-% @outputs: data: struct with year, DG_SG, DG_All, RR
-%
+% @inputs:            - fileName: file name of the file to read
+% @outputs:           - data: struct with year, DG_SG, DG_AR, RR
+
 
     matrixData = dlmread(fileName,',',1,0);
     
