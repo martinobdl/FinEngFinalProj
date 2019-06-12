@@ -1,20 +1,50 @@
+"""
+Collection of utilities functions for the Final Project of the Course in Fin Eng in capital requirement
+model risk.
+"""
+
 import numpy as np
 import scipy
 import scipy.interpolate
 
 def betaParameter(mu,sigma):
+    """
+    Computes alpha e beta parameters of a beta distribution given mean and
+    standard deviation.
 
+    @inputs:        - mu:     mean of beta distribution (scalar or vector)
+                    - sigma:  standard deviation of beta distribution (scalar or vector)
+    @outputs:       - alpha:  alpha patameter of beta distribution (scalar or vector)
+                    - beta:   beta parameter of beta distribution (scalar or vector)
+    """
     beta  = (1-mu)*(mu*(1-mu)-sigma**2)/(sigma**2)
     alpha = mu/(1-mu)*beta
 
     return [alpha,beta]
 
 def correlationFromBasel2(defaultRate):
+    """
+    Computes the correlation as a function of the defualt rate as in Basel II
+    requiremnts.
+
+    @inputs:          - defaultRate: scalar or vector
+    @outputs:         - correlation: scalar or vector
+
+    """
     rhoB = 0.12*(1-np.exp(-50*defaultRate))/(1-np.exp(-50))+0.24*(1-(1-np.exp(-50*defaultRate))/(1-np.exp(-50)))
 
     return rhoB
 
 def samplingFromPosterior(N_sim,x,y):
+    """
+    Simulates a vector of variables extracted from an empirical density using
+    the cumulative density function inversion sampling.
+
+    @inputs:               - nSim: number of variable to be simulated
+                           - x: vector of points on which density in given
+                           - y: density from which extract simulations
+    @outputs:              - X: sampled vector
+    """
     cdf = scipy.integrate.cumtrapz(y,x)
     cdf_unique, idx = np.unique(cdf, return_index=True)
     u = np.random.uniform(0,1,N_sim)
@@ -25,7 +55,17 @@ def samplingFromPosterior(N_sim,x,y):
 
 
 def mcmc(x0,loglikelihood,logprior,stepsize,nSim):
+    """
+    Samples nSim samples from a Bayesian Posterior distribution described by loglikelihood and logprior
 
+
+    @inputs:               - x0: starting point of the Markov Chain
+                           - loglikelihood: handle function of the loglikrlyhood
+                           - logprior: handle function of the logprior
+                           - stepsize: variance of the symmetric distribution used for generating the porposals
+                           - nSim: number of simulations
+    @outputs:              - X: Samples drawn
+    """
     X=np.zeros(int(nSim))
 
     logPrior=logprior(x0)
