@@ -91,6 +91,8 @@ def CapitalRequirementAlternativeHP(
     CapitalRequirement = CapitalRequirementNominalHP(recoveryRate,
     defaultRate,correlation,confidenceLevel,nObligors)
 
+    Warning: np.percentile uses a different interpolation than MATLAB
+
     Computes the capital requirement for a Homogeneous Portfolio, given
     market parameters at a given confidence level, nominal model.
 
@@ -113,7 +115,7 @@ def CapitalRequirementAlternativeHP(
 
     loss               = exposureAtDefault*lossGivenDefault*numberOfDefaults
 
-    valueAtRisk        = np.percentile(loss,confidenceLevel*100)
+    valueAtRisk        = np.percentile(loss,confidenceLevel*100,interpolation='higher')
     expectedLoss       = np.mean(loss)
 
     CapitalRequirement = valueAtRisk - expectedLoss
