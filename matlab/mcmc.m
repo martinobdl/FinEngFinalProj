@@ -5,7 +5,7 @@ function X=mcmc(x0,loglikelihood,logprior,stepsize,nSim)
 %
 %
 % @inputs:               - x0: starting point of the Markov Chain
-%                        - loglikelihood: handle function of the loglikrlyhood
+%                        - loglikelihood: handle function of the loglikelihood
 %                        - logprior: handle function of the logprior
 %                        - stepsize: variance of the symmetric distribution used for generating the porposals
 %                        - nSim: number of simulations
