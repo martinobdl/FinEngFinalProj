@@ -1,4 +1,11 @@
 function [S1,V] = SobolInidices(parameterSimulations)
+% [S1,V] = SOBOLINDICES(parameterSimulations)
+%
+% Computes the Sobol's Indices for the CapitalRequirementNominalLHP
+%
+% @inputs:            - parameterSimulations: simulation of the parameter of size: Nsim x Nparam
+% @outputs:           - S1: Sobol 1st level indices
+%                     - V: variances of the S1 indices
 
     M = parameterSimulations;
     nSim = size(M,1);
