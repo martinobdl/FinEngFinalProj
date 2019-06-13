@@ -1,15 +1,16 @@
 function d_CRstd = CramerRao_d(correlation, defaultBarrier, nObligors,T)
-% expectedLL = CRAMERRAO_D(correlation, defaultBarrier, nObligors,T)
+% expectedLL = CRAMERRAO_D(correlation, defaultBarrier, nObligors, T)
 %
 % Computes the Cramer-Rao standard deviation limit for the d default
 % barrier threshold in the points specified by defaultBarrier, correlation
 %
-% @inputs:       - correlation: scalar or Ax1x1 matrix
+% @inputs:       - correlation:    scalar or Ax1x1 matrix
 %                - defaultBarrier: scalar or 1xBx1 matrix
-%                - nObligors: scalar
-%                - T: time parameter
+%                - nObligors:      scalar
+%                - T:              time parameter
 % @outputs       - d_CRstd: scalar or AxB matrix, each row corresponds to a
 %                   correlation, each column to a value of defaultBarrier
+%
 
 epsilon = 1e-6;                        % increment of independent variable
 
@@ -40,6 +41,7 @@ LL_minus = log(P_minus);
 
 secondDerivativeLL = (LL_plus-2.*LL_central+LL_minus)./epsilon^2;
 
+% Check if there are NaN
 if sum(sum(sum(isnan(secondDerivativeLL))))>0
     error("loglikelihood value goes to infinity, choose other input value")
 end

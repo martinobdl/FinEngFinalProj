@@ -12,6 +12,7 @@ function CapitalRequirement = CapitalRequirementNominalHP(recoveryRate,...
 %                 - confidenceLevel:   scalar
 %                 - nObligors:         scalar
 % @outputs:       - CapitalRequirement: scalar
+%
  
 exposureAtDefault   = 1/nObligors;
 lossGivenDefault    = 1-recoveryRate;

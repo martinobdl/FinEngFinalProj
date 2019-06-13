@@ -11,6 +11,7 @@ function CapitalRequirement = CapitalRequirementNominalLHP(recoveryRate,...
 %                 - correlation:       scalar 
 %                 - confidenceLevel:   scalar
 % @outputs:       - CapitalRequirement: scalar
+%
 
 lossGivenDefault = (1-recoveryRate);
 defaultBarrier   = norminv(defaultRate);

@@ -8,6 +8,7 @@ function [alpha,beta] = betaParameter(mu,sigma)
 %                 - sigma:  standard deviation of beta distribution
 % @outputs:       - alpha:  alpha patameter of beta distribution
 %                 - beta:   beta parameter of beta distribution
+%
 
 % Check admissibility of inputs
 if min(mu-1/2*(1-sqrt(1-4*sigma.^2)))<0 ...
