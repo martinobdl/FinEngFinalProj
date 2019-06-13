@@ -86,19 +86,49 @@ def mcmc(x0,loglikelihood,logprior,stepsize,nSim):
     return X
 
 def posteriorDistributionRho(rho_hat,rho_vect,alpha,beta):
+    """
+    Computes posterior distribution when the prior is uniform and the
+    likelihood is a beta given the observed rho_hat.
+    @inputs:    - rho_hat:  observation on which the posterior is conditioned
+                - rho_vect: vector of points on which evaluate posterior
+                - alpha:    vector of alpha parameter assiciated to rho_vect
+                - beta:     vector of beta parameter associated to rho_vect
+
+    @outputs:   - h_posterior: vector of posterior distribution on rho_vect
+    """
     tmp         = scipy.stats.beta.pdf(rho_hat,alpha,beta)
     h_posterior = tmp/(np.trapz(tmp,rho_vect))
 
     return h_posterior
 
 def posteriorDistributionD(d,d_vect,d_CR_std):
+    """
+    Computes posterior distribution when the prior is standard normal and the
+    likelihood is a normal given the observed d_hat, with mean d_vect and
+    standard deviation d_std.
+
+    @inputs:    - d_hat:  observation on which the posterior is conditioned
+                - d_vect: vector of points on which evaluate posterior
+                - d_std:  vector of standard deviations on d_vect points
+    @outputs:   - h_posterior: vector of posterior distribution on d_vect
+    """
     tmp         = scipy.stats.norm.pdf(d_vect)*scipy.stats.norm.pdf(d,d_vect,d_CR_std)
     h_posterior = tmp/(np.trapz(tmp,d_vect))
 
     return h_posterior
 
 def CramerRao_d(correlation, defaultBarrier, nObligors, T):
+    """
+    Computes the Cramer-Rao standard deviation limit for the d default
+    barrier threshold in the points specified by defaultBarrier, correlation
 
+    @inputs:       - correlation: scalar or Ax1x1 matrix
+                   - defaultBarrier: scalar or 1xBx1 matrix
+                   - nObligors: scalar
+                   - T: time parameter
+    @outputs       - d_CRstd: scalar or AxB matrix, each row corresponds to a
+                      correlation, each column to a value of defaultBarrier
+    """
     epsilon = 1e-6
     X = np.arange(nObligors+1)
 
@@ -127,11 +157,30 @@ def CramerRao_d(correlation, defaultBarrier, nObligors, T):
     return d_CRstd
 
 def CramerRao_rho(Nob,rho_vect,T):
+    """
+    Computes Cramer Rao bound, standard deviation, for the correlation.
 
+    @input:           - Nob:      scalar, number of obligors
+                      - rho:      scalar or vector on which compute the limit
+    @output:          - rho_CRstd:scalar or vector
+    """
     return np.sqrt((2*(1-rho_vect)**2*(1+(Nob-1)*rho_vect)**2)/\
         (T*Nob*(Nob-1)))
 
 def bayesianPrediction(x_vect,p_vect,p_distr,handlef):
+    """
+    Computes numerically the class conditional denisty (ccd) given a
+    posterior and a model pdf.
+
+    @inputs:               - x_vect: vector of where the ccd will be defined
+                           - param_vect: vector of vector the posterior is
+                           defined
+                           - posterior: values of the posterior (same dim as
+                           param_vect)
+                           - model_pdf: handel function of the pdf
+    @outputs:              - ccd_normalized: vector class conditiona density
+                                             defined on x_vect
+    """
     n = len(x_vect)
     x_dd = np.zeros(n)
     for i in range(n):
