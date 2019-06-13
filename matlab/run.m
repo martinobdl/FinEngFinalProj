@@ -271,7 +271,7 @@ d_surf   = linspace(-4,4,80);                   % grid on which d_stdCR is
 rho_surf = linspace(0,0.999,20)';               % computed, rho and d
 
 % takes ~4min
-% CramerRao_surf  = CramerRao_d(rho_surf,d_surf,N_obligors,T);% Cramer Rao standard dev
+CramerRao_surf  = CramerRao_d(rho_surf,d_surf,N_obligors,T);% Cramer Rao standard dev
 CRsurface = struct('rho',rho_surf,'d',d_surf,'surf',CramerRao_surf);
 
      % i. Of threshold d
