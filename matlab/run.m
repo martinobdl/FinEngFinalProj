@@ -4,10 +4,9 @@ clear all
 close all
 clc 
 rng('default')
-f = waitbar(0,'Please wait, it will take around 10 minutes ');
-pause(2)
+
 %% INPUT
-waitbar(0.01,f,sprintf('Reading data'))
+
 data = readData('../data/dati_Moody.csv');      % reading input data
 T     = length(data.years);              % number of data
 T_rho = 30;                              % length of tarashev zhu time series
@@ -42,7 +41,6 @@ systematicRisk    = randn(N_sim,1);          % and systematic risk
 
 %% A - COMPUTE Regulatory CapitalS IN THE NOMINAL MODEL
   %% A.i. Using mean correlation
-waitbar(0.05,f,sprintf('Computing Required Capital for Nominal Model'))
 disp('Required Capital nominal model')
 RC_LHP = CapitalRequirementNominalLHP(RecRate_mean,DefRate_mean,...
          rho_mean,CL);                % For Large Homogeneous Portfolio
@@ -74,7 +72,6 @@ disp(table([RC_LHP_MC;RC_HP_MC], ...
 
 %% B - FREQUENTIST INFERENCE
  %% B.1 Verify hypotesis on data 
-waitbar(0.20,f,sprintf('Frequentist inference'))
 
 % Shapiro wilk normality tests
 disp('Default barrier normality, Shapiro-Wilk test')
@@ -104,8 +101,7 @@ rho_sim_freq = betarnd(alpha,beta,N_sim,1);    % simulated beta correlation
 rho_sim_B_freq = correlationFromBasel2(DefRate_sim_freq);% simulated basel correlation
 
   %% B.2 Regulatory Capital & Add On using correlation from data
-  waitbar(0.30,f,sprintf('Computing Capital Requirement and & Add On'))
-  disp('Regulatory Capital & Add On: frequentist inference')
+disp('Regulatory Capital & Add On: frequentist inference')
 
 disp('Large Homogeneous Portfolio')
 % Computing Regulatory Capitals simulating different parameters LHP CL
@@ -201,7 +197,7 @@ disp(table(RCf_LHP_d_close,addOn_F_LHP_d_close,...
 
 %% C - BAYESIAN INFERENCE
 %% C.1 Posterior distributions fixing variance equal to empiric
-waitbar(0.40,f,sprintf('Computing Bayesian inference'))  
+
 % i. Of threshold d - parameter mean
 d_mean_post    = sum(d)/(T+var(d));        % posterion mean
 d_std_post = std(d)/sqrt(T+var(d));        % posterior standard deviation
@@ -229,7 +225,6 @@ rho_pdf = bayesianPrediction(xrho_vect,rho_vect,posterior_rho,f_x_rho); % densit
 rho_sim_bayes = samplingFromPdf(N_sim,xrho_vect,rho_pdf); % simulated rho
 
   %% C.2 Regulatory Capital & Add On using correlation from data
-waitbar(0.45,f,sprintf('Computing Capital requirement and Add-on'))  
 
  disp('Capitar Requirement & Add On, Bayesian inference')
 
@@ -273,8 +268,8 @@ disp(table(RCaltB_HP,addOnB_HP,...
      % Compute the Cramer Rao std for different value of d and rho
 d_surf   = linspace(-4,4,80);                   % grid on which d_stdCR is  
 rho_surf = linspace(0,0.999,20)';               % computed, rho and d
-waitbar(0.50,f,sprintf('Computing Cramer Rao surface: it will takes few minutes'))  
 
+disp("Please wait 5min for the program to compute the CR surface")
 % takes ~4min
 CramerRao_surf  = CramerRao_d(rho_surf,d_surf,N_obligors,T);% Cramer Rao standard dev
 CRsurface = struct('rho',rho_surf,'d',d_surf,'surf',CramerRao_surf);
@@ -282,7 +277,6 @@ CRsurface = struct('rho',rho_surf,'d',d_surf,'surf',CramerRao_surf);
      % i. Of threshold d
 d_CramerRao_std = interp2(d_surf,rho_surf,CramerRao_surf,... % Cramer Rao stdev row
                   d_vect,rho_mean,'spline');  % on d_vect, given rho_mean
-waitbar(0.70,f,sprintf('Computing posterior of d'))  
 
 posterior_d_CramerRao = posteriorDistributionD(d_hat,d_vect,d_CramerRao_std); % posterior distribution d
 
@@ -295,7 +289,6 @@ d_sim_bayes_CramerRao       = samplingFromPdf(N_sim,xd_vect,d_pdf_CramerRao); % 
 DefRate_sim_bayes_CramerRao = normcdf(d_sim_bayes_CramerRao);                 % simulated default rate
 
    %  ii. Of correlation rho
-waitbar(0.75,f,sprintf('Computing posterior of rho'))  
 
 rho_CramerRao_std = CramerRao_rho(10891,rho_vect,T_rho);       % Cramer Rao stdev 
 [aaCR,bbCR]       = betaParameter(rho_vect,rho_CramerRao_std); % A and B beta parameters 
@@ -307,16 +300,16 @@ f_x_rhoCR = @(x) betapdf(x,aa,bb);           % density of x given mean (unknown)
 rho_pdf_CramerRao = bayesianPrediction(xrho_vect,rho_vect,hposterior_rho_CR,f_x_rhoCR); % density of X conditioned on data
 
 rho_sim_bayes_CramerRao = samplingFromPosterior(N_sim,xrho_vect,rho_pdf_CramerRao); % simulated correlation
-waitbar(0.80,f,sprintf('Computing Nested Montecarlo'))  
+
     % iii. nested simulation
 n_rho = 1e3;                          % number of rho         
 n_d   = 1e3;                          % number of d for each rho
 rho_tmp = samplingFromPdf(n_rho,xrho_vect,rho_pdf_CramerRao); 
 
+disp("Please wait 3min for the program to do nested simulations")
 [rho_nested, DR_nested]=nestedSimulation(d_hat,d_std,n_d,CRsurface,rho_tmp); % paired vector of simulated data
 
   %% C.4 Regulatory Capital & Add on
-  waitbar(0.90,f,sprintf('Computing Capital Requirement and & Add On'))  
 
 disp('Homogeneous Portfolio, Cramer Rao')
 % Computing Regulatory Capitals simulating different parameters HP CL
@@ -339,7 +332,6 @@ disp(table(RCaltB_HP,addOnB_HP,...
     'VariableNames',{'Regulatory_Capital','Add_On'}))
 
 %% Sobol Inidices
-  waitbar(0.95,f,sprintf('Computing Sobol Indices'))  
 
 Covariance = cov(norminv(data.DR_SG),data.RR);
 Covariance(1,2)=0;Covariance(2,1)=0;
@@ -353,8 +345,4 @@ sim3 = betarnd(a,b,N_sim,1);    %correlation
 parameterSim = [sim1,sim2,sim3];
 
 [S1,~] = SobolInidices(parameterSim);
-
-waitbar(1,f,sprintf('Finished'))  
-pause(1)
-delete(f)
 
